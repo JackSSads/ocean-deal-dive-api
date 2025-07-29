@@ -1,0 +1,13 @@
+Cadastrar passeio: {
+    clientName: '',
+    clientContact: '',
+    contactType: 'whatsapp' as 'whatsapp' | 'phone' | 'email',
+    date: '',
+    guideName: '',
+    totalValue: '',
+    guideCommission: '',
+    commissionType: 'percentage' as 'percentage' | 'fixed',
+    clientPaymentStatus: 'pending' as 'paid' | 'pending',
+    guidePaymentStatus: 'pending' as 'paid' | 'pending',
+}
+
