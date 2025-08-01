@@ -115,18 +115,18 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
     try {
-        const tourId = req.params.id;
+        const tour_id = req.params.id;
         
         logger.api("PUT /api/tour/:id - Updating tour", {
-            tourId,
+            tour_id,
             body: req.body,
             user_id: req.user_id
         });
 
-        const result = await TourService.updateTour(tourId, req.body);
-        
+        const result = await TourService.updateTour(tour_id, req.body);
+
         logger.api("PUT /api/tour/:id - Tour updated successfully", {
-            tourId,
+            tourId: tour_id,
             user_id: req.user_id
         });
 
@@ -267,4 +267,3 @@ router.get("/guide/:guideName", async (req, res) => {
 });
 
 module.exports = router;
-
