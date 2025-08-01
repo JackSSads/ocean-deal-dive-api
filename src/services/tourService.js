@@ -12,12 +12,12 @@ const logger = require("../../logger");
 
 class TourService {
     async createTour(tourData) {
-        logger.info("TourService: Creating new tour", { 
+        logger.info("TourService: Creating new tour", {
             client_name: tourData.client_name,
             guide_name: tourData.guide_name,
-            tour_date: tourData.tour_date 
+            tour_date: tourData.tour_date
         });
-        
+
         try {
             // Validações básicas
             if (!tourData.client_name || !tourData.client_contact || !tourData.tour_date || !tourData.guide_name) {
@@ -38,7 +38,7 @@ class TourService {
 
             // Validar status de pagamento
             const validPaymentStatuses = ['paid', 'pending'];
-            if (!validPaymentStatuses.includes(tourData.client_payment_status) || 
+            if (!validPaymentStatuses.includes(tourData.client_payment_status) ||
                 !validPaymentStatuses.includes(tourData.guide_payment_status)) {
                 throw new Error("Status de pagamento inválido");
             }
@@ -53,7 +53,7 @@ class TourService {
             }
 
             const tour_id = await query_tour_create(tourData);
-            
+
             logger.info("TourService: Tour created successfully", { tour_id });
             return { tour_id, message: "Passeio criado com sucesso" };
         } catch (error) {
@@ -64,10 +64,10 @@ class TourService {
 
     async getAllTours() {
         logger.info("TourService: Fetching all tours");
-        
+
         try {
             const tours = await query_tour_get_all();
-            
+
             logger.info("TourService: Tours fetched successfully", { count: tours.length });
             return tours;
         } catch (error) {
@@ -78,14 +78,14 @@ class TourService {
 
     async getTourById(tour_id) {
         logger.info("TourService: Fetching tour by ID", { tour_id });
-        
+
         try {
             if (!tour_id || isNaN(parseInt(tour_id))) {
                 throw new Error("ID do passeio inválido");
             }
 
             const tour = await query_tour_get_by_id(tour_id);
-            
+
             if (!tour) {
                 logger.warn("TourService: Tour not found", { tour_id });
                 throw new Error("Passeio não encontrado");
@@ -101,7 +101,7 @@ class TourService {
 
     async updateTour(tour_id, tour_data) {
         logger.info("TourService: Updating tour", { tour_id });
-        
+
         try {
             if (!tour_id || isNaN(parseInt(tour_id))) {
                 throw new Error("ID do passeio inválido");
@@ -155,8 +155,13 @@ class TourService {
                 }
             }
 
-            const success = await query_tour_update(tour_id, tour_data);
+            const date = new Date(tour_data.tour_date);
+            const formattedDate = date.toISOString().replace('T', ' ').substring(0, 19);
+
+            tour_data.tour_date = formattedDate
             
+            const success = await query_tour_update(tour_id, tour_data);
+
             if (!success) {
                 throw new Error("Erro ao atualizar passeio");
             }
@@ -171,7 +176,7 @@ class TourService {
 
     async deleteTour(tour_id) {
         logger.info("TourService: Deleting tour", { tour_id });
-        
+
         try {
             if (!tour_id || isNaN(parseInt(tour_id))) {
                 throw new Error("ID do passeio inválido");
@@ -184,7 +189,7 @@ class TourService {
             }
 
             const success = await query_tour_delete(tour_id);
-            
+
             if (!success) {
                 throw new Error("Erro ao deletar passeio");
             }
@@ -199,12 +204,12 @@ class TourService {
 
     async getToursByDateRange(startDate, endDate) {
         logger.info("TourService: Fetching tours by date range", { startDate, endDate });
-        
+
         try {
             // Validar datas
             const start = new Date(startDate);
             const end = new Date(endDate);
-            
+
             if (isNaN(start.getTime()) || isNaN(end.getTime())) {
                 throw new Error("Datas inválidas");
             }
@@ -214,18 +219,18 @@ class TourService {
             }
 
             const tours = await query_tour_get_by_date_range(startDate, endDate);
-            
-            logger.info("TourService: Tours by date range fetched successfully", { 
-                startDate, 
-                endDate, 
-                count: tours.length 
+
+            logger.info("TourService: Tours by date range fetched successfully", {
+                startDate,
+                endDate,
+                count: tours.length
             });
             return tours;
         } catch (error) {
-            logger.error("TourService: Error fetching tours by date range", { 
-                startDate, 
-                endDate, 
-                error: error.message 
+            logger.error("TourService: Error fetching tours by date range", {
+                startDate,
+                endDate,
+                error: error.message
             });
             throw new Error(error.message);
         };
@@ -233,23 +238,23 @@ class TourService {
 
     async getToursByGuide(guide_name) {
         logger.info("TourService: Fetching tours by guide", { guide_name });
-        
+
         try {
             if (!guide_name || guide_name.trim() === '') {
                 throw new Error("Nome do guia é obrigatório");
             }
 
             const tours = await query_tour_get_by_guide(guide_name.trim());
-            
-            logger.info("TourService: Tours by guide fetched successfully", { 
-                guide_name, 
-                count: tours.length 
+
+            logger.info("TourService: Tours by guide fetched successfully", {
+                guide_name,
+                count: tours.length
             });
             return tours;
         } catch (error) {
-            logger.error("TourService: Error fetching tours by guide", { 
-                guide_name, 
-                error: error.message 
+            logger.error("TourService: Error fetching tours by guide", {
+                guide_name,
+                error: error.message
             });
             throw new Error(error.message);
         };
