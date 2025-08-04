@@ -70,24 +70,32 @@ class TourService {
 
         try {
             const tours = await query_tour_get_all(page, limit);
-            const totalCount = await query_tour_get_count();
+            const metrics = await query_tour_get_count();
 
-            logger.info("TourService: Tours fetched successfully", { 
-                count: tours.length, 
-                totalCount,
+            logger.info("TourService: Tours fetched successfully", {
+                count: tours.length,
+                metrics,
                 page,
-                limit 
+                limit
             });
-            
+
             return {
                 tours,
                 pagination: {
                     page,
                     limit,
-                    totalCount,
-                    totalPages: Math.ceil(totalCount / limit),
-                    hasNextPage: page * limit < totalCount,
+                    totalCount: metrics.total_count,
+                    totalPages: Math.ceil(metrics.total_count / limit),
+                    hasNextPage: page * limit < metrics,
                     hasPrevPage: page > 1
+                },
+                metrics: {
+                    total_count: Number(metrics.total_count),
+                    total_value: Number(metrics.total_value),
+                    total_guide_commission: Number(metrics.total_guide_commission),
+                    total_pending_payments: Number(metrics.total_pending_payments),
+                    total_paid_tours: Number(metrics.total_paid_tours),
+                    total_guide_commission_pedding: Number(metrics.total_guide_commission_pedding)
                 }
             };
         } catch (error) {
@@ -179,7 +187,7 @@ class TourService {
             const formattedDate = date.toISOString().replace('T', ' ').substring(0, 19);
 
             tour_data.tour_date = formattedDate
-            
+
             const success = await query_tour_update(tour_id, tour_data);
 
             if (!success) {
@@ -239,26 +247,33 @@ class TourService {
             }
 
             const tours = await query_tour_get_by_date_range(startDate, endDate, page, limit);
-            const totalCount = await query_tour_get_by_date_range_count(startDate, endDate);
+            const metrics = await query_tour_get_by_date_range_count(startDate, endDate);
 
             logger.info("TourService: Tours by date range fetched successfully", {
                 startDate,
                 endDate,
-                count: tours.length,
-                totalCount,
+                metrics,
                 page,
                 limit
             });
-            
+
             return {
                 tours,
                 pagination: {
                     page,
                     limit,
-                    totalCount,
-                    totalPages: Math.ceil(totalCount / limit),
-                    hasNextPage: page * limit < totalCount,
+                    totalCount: metrics.total_count,
+                    totalPages: Math.ceil(metrics.total_count / limit),
+                    hasNextPage: page * limit < metrics,
                     hasPrevPage: page > 1
+                },
+                metrics: {
+                    total_count: Number(metrics.total_count),
+                    total_value: Number(metrics.total_value),
+                    total_guide_commission: Number(metrics.total_guide_commission),
+                    total_pending_payments: Number(metrics.total_pending_payments),
+                    total_paid_tours: Number(metrics.total_paid_tours),
+                    total_guide_commission_pedding: Number(metrics.total_guide_commission_pedding)
                 }
             };
         } catch (error) {
@@ -280,25 +295,32 @@ class TourService {
             }
 
             const tours = await query_tour_get_by_guide(guide_name.trim(), page, limit);
-            const totalCount = await query_tour_get_by_guide_count(guide_name.trim());
+            const metrics = await query_tour_get_by_guide_count(guide_name.trim());
 
             logger.info("TourService: Tours by guide fetched successfully", {
                 guide_name,
-                count: tours.length,
-                totalCount,
+                metrics,
                 page,
                 limit
             });
-            
+
             return {
                 tours,
                 pagination: {
                     page,
                     limit,
-                    totalCount,
-                    totalPages: Math.ceil(totalCount / limit),
-                    hasNextPage: page * limit < totalCount,
+                    totalCount: metrics.total_count,
+                    totalPages: Math.ceil(metrics.total_count / limit),
+                    hasNextPage: page * limit < metrics,
                     hasPrevPage: page > 1
+                },
+                metrics: {
+                    total_count: Number(metrics.total_count),
+                    total_value: Number(metrics.total_value),
+                    total_guide_commission: Number(metrics.total_guide_commission),
+                    total_pending_payments: Number(metrics.total_pending_payments),
+                    total_paid_tours: Number(metrics.total_paid_tours),
+                    total_guide_commission_pedding: Number(metrics.total_guide_commission_pedding)
                 }
             };
         } catch (error) {

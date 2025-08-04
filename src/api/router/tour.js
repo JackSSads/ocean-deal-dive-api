@@ -65,13 +65,15 @@ router.get("/", async (req, res) => {
             totalCount: result.pagination.totalCount,
             page,
             limit,
+            metrics:result.metrics,
             user_id: req.user_id
         });
 
         res.status(200).json({
             success: true,
             data: result.tours,
-            pagination: result.pagination
+            pagination: result.pagination,
+            metrics:result.metrics
         });
     } catch (error) {
         logger.error("GET /api/tour - Error fetching tours", {
@@ -228,7 +230,8 @@ router.get("/date-range", async (req, res) => {
         res.status(200).json({
             success: true,
             data: result.tours,
-            pagination: result.pagination
+            pagination: result.pagination,
+            metrics:result.metrics
         });
     } catch (error) {
         logger.error("GET /api/tour/date-range - Error fetching tours by date range", {
@@ -272,7 +275,8 @@ router.get("/guide/:guideName", async (req, res) => {
         res.status(200).json({
             success: true,
             data: result.tours,
-            pagination: result.pagination
+            pagination: result.pagination,
+            metrics:result.metrics
         });
     } catch (error) {
         logger.error("GET /api/tour/guide/:guideName - Error fetching tours by guide", {
