@@ -39,8 +39,9 @@ const query_tour_create = (tourData) => {
     });
 };
 
-const query_tour_get_all = () => {
+const query_tour_get_all = (page = 1, limit = 10) => {
     return new Promise((resolve, reject) => {
+        const offset = (page - 1) * limit;
         const sql = `
             SELECT 
                 tour_id,
@@ -55,13 +56,28 @@ const query_tour_get_all = () => {
                 client_payment_status,
                 guide_payment_status
             FROM aqua_dive.tour 
-            ORDER BY created_at DESC`;
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?`;
+        
+        pool.query(sql, [limit, offset], (err, result) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(result);
+            };
+        });
+    });
+};
+
+const query_tour_get_count = () => {
+    return new Promise((resolve, reject) => {
+        const sql = `SELECT COUNT(*) as total FROM aqua_dive.tour`;
         
         pool.query(sql, (err, result) => {
             if (err) {
                 reject(err);
             } else {
-                resolve(result);
+                resolve(result[0].total);
             };
         });
     });
@@ -151,8 +167,9 @@ const query_tour_delete = (tourId) => {
     });
 };
 
-const query_tour_get_by_date_range = (startDate, endDate) => {
+const query_tour_get_by_date_range = (startDate, endDate, page = 1, limit = 10) => {
     return new Promise((resolve, reject) => {
+        const offset = (page - 1) * limit;
         const sql = `
             SELECT 
                 tour_id,
@@ -167,10 +184,11 @@ const query_tour_get_by_date_range = (startDate, endDate) => {
                 client_payment_status,
                 guide_payment_status
             FROM aqua_dive.tour 
-            WHERE date BETWEEN ? AND ?
-            ORDER BY date DESC`;
+            WHERE tour_date BETWEEN ? AND ?
+            ORDER BY tour_date DESC
+            LIMIT ? OFFSET ?`;
         
-        pool.query(sql, [startDate, endDate], (err, result) => {
+        pool.query(sql, [startDate, endDate, limit, offset], (err, result) => {
             if (err) {
                 reject(err);
             } else {
@@ -180,8 +198,26 @@ const query_tour_get_by_date_range = (startDate, endDate) => {
     });
 };
 
-const query_tour_get_by_guide = (guideName) => {
+const query_tour_get_by_date_range_count = (startDate, endDate) => {
     return new Promise((resolve, reject) => {
+        const sql = `
+            SELECT COUNT(*) as total 
+            FROM aqua_dive.tour 
+            WHERE tour_date BETWEEN ? AND ?`;
+        
+        pool.query(sql, [startDate, endDate], (err, result) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(result[0].total);
+            };
+        });
+    });
+};
+
+const query_tour_get_by_guide = (guideName, page = 1, limit = 10) => {
+    return new Promise((resolve, reject) => {
+        const offset = (page - 1) * limit;
         const sql = `
             SELECT 
                 tour_id,
@@ -197,9 +233,10 @@ const query_tour_get_by_guide = (guideName) => {
                 guide_payment_status
             FROM aqua_dive.tour 
             WHERE guide_name LIKE ?
-            ORDER BY date DESC`;
+            ORDER BY tour_date DESC
+            LIMIT ? OFFSET ?`;
         
-        pool.query(sql, [`%${guideName}%`], (err, result) => {
+        pool.query(sql, [`%${guideName}%`, limit, offset], (err, result) => {
             if (err) {
                 reject(err);
             } else {
@@ -209,12 +246,32 @@ const query_tour_get_by_guide = (guideName) => {
     });
 };
 
+const query_tour_get_by_guide_count = (guideName) => {
+    return new Promise((resolve, reject) => {
+        const sql = `
+            SELECT COUNT(*) as total 
+            FROM aqua_dive.tour 
+            WHERE guide_name LIKE ?`;
+        
+        pool.query(sql, [`%${guideName}%`], (err, result) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(result[0].total);
+            };
+        });
+    });
+};
+
 module.exports = {
     query_tour_create,
     query_tour_get_all,
+    query_tour_get_count,
     query_tour_get_by_id,
     query_tour_update,
     query_tour_delete,
     query_tour_get_by_date_range,
-    query_tour_get_by_guide
+    query_tour_get_by_date_range_count,
+    query_tour_get_by_guide,
+    query_tour_get_by_guide_count
 }; 

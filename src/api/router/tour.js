@@ -49,21 +49,29 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        
         logger.api("GET /api/tour - Fetching all tours", {
+            page,
+            limit,
             user_id: req.user_id
         });
 
-        const tours = await TourService.getAllTours();
+        const result = await TourService.getAllTours(page, limit);
         
         logger.api("GET /api/tour - Tours fetched successfully", {
-            count: tours.length,
+            count: result.tours.length,
+            totalCount: result.pagination.totalCount,
+            page,
+            limit,
             user_id: req.user_id
         });
 
         res.status(200).json({
             success: true,
-            data: tours,
-            count: tours.length
+            data: result.tours,
+            pagination: result.pagination
         });
     } catch (error) {
         logger.error("GET /api/tour - Error fetching tours", {
@@ -187,10 +195,14 @@ router.delete("/:id", async (req, res) => {
 router.get("/date-range", async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
         
         logger.api("GET /api/tour/date-range - Fetching tours by date range", {
             startDate,
             endDate,
+            page,
+            limit,
             user_id: req.user_id
         });
 
@@ -201,19 +213,22 @@ router.get("/date-range", async (req, res) => {
             });
         }
 
-        const tours = await TourService.getToursByDateRange(startDate, endDate);
+        const result = await TourService.getToursByDateRange(startDate, endDate, page, limit);
         
         logger.api("GET /api/tour/date-range - Tours by date range fetched successfully", {
             startDate,
             endDate,
-            count: tours.length,
+            count: result.tours.length,
+            totalCount: result.pagination.totalCount,
+            page,
+            limit,
             user_id: req.user_id
         });
 
         res.status(200).json({
             success: true,
-            data: tours,
-            count: tours.length
+            data: result.tours,
+            pagination: result.pagination
         });
     } catch (error) {
         logger.error("GET /api/tour/date-range - Error fetching tours by date range", {
@@ -233,24 +248,31 @@ router.get("/date-range", async (req, res) => {
 router.get("/guide/:guideName", async (req, res) => {
     try {
         const guideName = req.params.guideName;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
         
         logger.api("GET /api/tour/guide/:guideName - Fetching tours by guide", {
             guideName,
+            page,
+            limit,
             user_id: req.user_id
         });
 
-        const tours = await TourService.getToursByGuide(guideName);
+        const result = await TourService.getToursByGuide(guideName, page, limit);
         
         logger.api("GET /api/tour/guide/:guideName - Tours by guide fetched successfully", {
             guideName,
-            count: tours.length,
+            count: result.tours.length,
+            totalCount: result.pagination.totalCount,
+            page,
+            limit,
             user_id: req.user_id
         });
 
         res.status(200).json({
             success: true,
-            data: tours,
-            count: tours.length
+            data: result.tours,
+            pagination: result.pagination
         });
     } catch (error) {
         logger.error("GET /api/tour/guide/:guideName - Error fetching tours by guide", {

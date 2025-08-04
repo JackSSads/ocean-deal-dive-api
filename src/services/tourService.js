@@ -1,11 +1,14 @@
 const {
     query_tour_create,
     query_tour_get_all,
+    query_tour_get_count,
     query_tour_get_by_id,
     query_tour_update,
     query_tour_delete,
     query_tour_get_by_date_range,
-    query_tour_get_by_guide
+    query_tour_get_by_date_range_count,
+    query_tour_get_by_guide,
+    query_tour_get_by_guide_count
 } = require("../repositores/query_tour");
 
 const logger = require("../../logger");
@@ -62,14 +65,31 @@ class TourService {
         };
     };
 
-    async getAllTours() {
-        logger.info("TourService: Fetching all tours");
+    async getAllTours(page = 1, limit = 10) {
+        logger.info("TourService: Fetching all tours", { page, limit });
 
         try {
-            const tours = await query_tour_get_all();
+            const tours = await query_tour_get_all(page, limit);
+            const totalCount = await query_tour_get_count();
 
-            logger.info("TourService: Tours fetched successfully", { count: tours.length });
-            return tours;
+            logger.info("TourService: Tours fetched successfully", { 
+                count: tours.length, 
+                totalCount,
+                page,
+                limit 
+            });
+            
+            return {
+                tours,
+                pagination: {
+                    page,
+                    limit,
+                    totalCount,
+                    totalPages: Math.ceil(totalCount / limit),
+                    hasNextPage: page * limit < totalCount,
+                    hasPrevPage: page > 1
+                }
+            };
         } catch (error) {
             logger.error("TourService: Error fetching tours", { error: error.message });
             throw new Error("Erro ao buscar passeios");
@@ -202,8 +222,8 @@ class TourService {
         };
     };
 
-    async getToursByDateRange(startDate, endDate) {
-        logger.info("TourService: Fetching tours by date range", { startDate, endDate });
+    async getToursByDateRange(startDate, endDate, page = 1, limit = 10) {
+        logger.info("TourService: Fetching tours by date range", { startDate, endDate, page, limit });
 
         try {
             // Validar datas
@@ -218,14 +238,29 @@ class TourService {
                 throw new Error("Data inicial deve ser menor que a data final");
             }
 
-            const tours = await query_tour_get_by_date_range(startDate, endDate);
+            const tours = await query_tour_get_by_date_range(startDate, endDate, page, limit);
+            const totalCount = await query_tour_get_by_date_range_count(startDate, endDate);
 
             logger.info("TourService: Tours by date range fetched successfully", {
                 startDate,
                 endDate,
-                count: tours.length
+                count: tours.length,
+                totalCount,
+                page,
+                limit
             });
-            return tours;
+            
+            return {
+                tours,
+                pagination: {
+                    page,
+                    limit,
+                    totalCount,
+                    totalPages: Math.ceil(totalCount / limit),
+                    hasNextPage: page * limit < totalCount,
+                    hasPrevPage: page > 1
+                }
+            };
         } catch (error) {
             logger.error("TourService: Error fetching tours by date range", {
                 startDate,
@@ -236,21 +271,36 @@ class TourService {
         };
     };
 
-    async getToursByGuide(guide_name) {
-        logger.info("TourService: Fetching tours by guide", { guide_name });
+    async getToursByGuide(guide_name, page = 1, limit = 10) {
+        logger.info("TourService: Fetching tours by guide", { guide_name, page, limit });
 
         try {
             if (!guide_name || guide_name.trim() === '') {
                 throw new Error("Nome do guia é obrigatório");
             }
 
-            const tours = await query_tour_get_by_guide(guide_name.trim());
+            const tours = await query_tour_get_by_guide(guide_name.trim(), page, limit);
+            const totalCount = await query_tour_get_by_guide_count(guide_name.trim());
 
             logger.info("TourService: Tours by guide fetched successfully", {
                 guide_name,
-                count: tours.length
+                count: tours.length,
+                totalCount,
+                page,
+                limit
             });
-            return tours;
+            
+            return {
+                tours,
+                pagination: {
+                    page,
+                    limit,
+                    totalCount,
+                    totalPages: Math.ceil(totalCount / limit),
+                    hasNextPage: page * limit < totalCount,
+                    hasPrevPage: page > 1
+                }
+            };
         } catch (error) {
             logger.error("TourService: Error fetching tours by guide", {
                 guide_name,
